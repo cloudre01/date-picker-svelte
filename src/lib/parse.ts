@@ -1,4 +1,5 @@
 import { getMonthLength } from './date-utils.js'
+import { parse as fnsParse } from 'date-fns'
 
 type RuleToken = {
   id: string
@@ -54,12 +55,40 @@ export function parse(str: string, tokens: FormatToken[], baseDate: Date | null)
     }
   }
 
+  function parseMonth(pattern: RegExp, max = 9) {
+    const matches = str.match(pattern)
+    if (matches?.[0]) {
+      str = str.slice(matches[0].length)
+      let d = null
+      if (max > 3) {
+        d = fnsParse(matches[0].slice(0, max), 'MMMM', new Date(2020, 0, 1, 0, 0, 0, 0) )
+      } else {
+        d = fnsParse(matches[0].slice(0, max), 'MMM', new Date(2020, 0, 1, 0, 0, 0, 0) )
+      }
+      if (d) {
+        return d.getMonth()
+      } else {
+        valid = false
+        return null
+      }
+    } else {
+      valid = false
+      return null
+    }
+  }
+
   function parseToken(token: FormatToken) {
     if (typeof token === 'string') {
       parseString(token)
     } else if (token.id === 'yyyy') {
       const value = parseUint(/^[0-9]{4}/, 0, 9999)
       if (value !== null) year = value
+    } else if (token.id === 'MMMM') {
+      const value = parseMonth(/^[A-Za-z]+/)
+      if (value !== null) month = value
+    } else if (token.id === 'MMM') {
+      const value = parseMonth(/^[A-Za-z]+/, 3)
+      if (value !== null) month = value
     } else if (token.id === 'MM') {
       const value = parseUint(/^[0-9]{2}/, 1, 12)
       if (value !== null) month = value - 1
@@ -102,6 +131,14 @@ const ruleTokens: RuleToken[] = [
   {
     id: 'yyyy',
     toString: (d: Date) => d.getFullYear().toString(),
+  },
+  {
+    id: 'MMMM',
+    toString: (d: Date) => d.toLocaleString('default', { month: 'long' }),
+  },
+  {
+    id: 'MMM',
+    toString: (d: Date) => d.toLocaleString('default', { month: 'short' }),
   },
   {
     id: 'MM',
