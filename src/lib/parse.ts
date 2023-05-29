@@ -61,9 +61,9 @@ export function parse(str: string, tokens: FormatToken[], baseDate: Date | null)
       str = str.slice(matches[0].length)
       let d = null
       if (max > 3) {
-        d = fnsParse(matches[0].slice(0, max), 'MMMM', new Date(2020, 0, 1, 0, 0, 0, 0) )
+        d = fnsParse(matches[0].slice(0, max), 'MMMM', new Date(2020, 0, 1, 0, 0, 0, 0))
       } else {
-        d = fnsParse(matches[0].slice(0, max), 'MMM', new Date(2020, 0, 1, 0, 0, 0, 0) )
+        d = fnsParse(matches[0].slice(0, max), 'MMM', new Date(2020, 0, 1, 0, 0, 0, 0))
       }
       if (d) {
         return d.getMonth()
